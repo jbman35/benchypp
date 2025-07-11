@@ -3,9 +3,9 @@ benchy++ is a header-only C++20 micro-library for making benchmarks that are sim
 
 | Platform                 | CPU `%` support | API used      |
 | ------------------------ | ---------------- | ----------------- |
-| Linux/macOS              | ✅ Oui            | `getrusage`       |
-| Windows                  | ✅ Oui            | `GetProcessTimes` |
-| Others (e.g.: WebAssembly) | 🚫 Non           | `cpu_load = -1.0` |
+| Linux/macOS              | ✅ Yes            | `getrusage`       |
+| Windows                  | ✅ Yes            | `GetProcessTimes` |
+| Others (e.g.: WebAssembly) | 🚫 No           | `cpu_load = -1.0` |
 
 Example
 ```cpp
