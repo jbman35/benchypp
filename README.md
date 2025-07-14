@@ -1,5 +1,7 @@
 # benchypp
 benchy++ is a header-only C++20 micro-library for making benchmarks that are simple, pretty and quick to integrate.
+It supports both of synchronous and asynchronous runs.
+
 
 | Platform                 | CPU `%` support | API used      |
 | ------------------------ | ---------------- | ----------------- |
@@ -14,18 +16,30 @@ Example
 #include <numeric>
 
 int main() {
-    auto result = benchy::run("accumulate 1M", [] {
+    benchy::run("std::vector<int> push_back 1M", [] {
+        std::vector<int> v;
+        v.reserve(1'000'000);
+        for (int i = 0; i < 1'000'000; ++i)
+            v.push_back(i);
+    });
+
+    benchy::run("accumulate 1M", [] {
         std::vector<int> v(1'000'000, 1);
         volatile int sum = std::accumulate(v.begin(), v.end(), 0);
         (void)sum;
-    }, 3);
+    }, 5);
 
-    // Use benchmark output data
-    std::cout << "\n[INFO] Raw measurements:\n"
-              << "  Average: " << result.avg_duration_ms << " ms\n"
-              << "  Total : " << result.total_duration_ms << " ms\n"
-              << "  CPU Load: " 
-              << (result.cpu_load_percent >= 0.0 ? std::to_string(result.cpu_load_percent) + "%" : "N/A")
-              << '\n';
+    benchy::run_async("std::vector<int> push_back 1M", [] {
+        std::vector<int> v;
+        v.reserve(1'000'000);
+        for (int i = 0; i < 1'000'000; ++i)
+            v.push_back(i);
+    });
+
+    benchy::run_async("accumulate 1M", [] {
+        std::vector<int> v(1'000'000, 1);
+        volatile int sum = std::accumulate(v.begin(), v.end(), 0);
+        (void)sum;
+    }, 5);
 }
 ```

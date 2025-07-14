@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <future>
 
 #if defined(__unix__) || defined(__APPLE__)
 #include <sys/resource.h>
@@ -54,14 +55,17 @@ inline double get_cpu_time_ms() {
 }
 #endif
 
-} // namespace internal
-
-inline Result run(const std::string& name, const std::function<void()>& func, int iterations = 1) {
+inline Result run(bool async, const std::string& name, const std::function<void()>& func, int iterations = 1) {
     double cpu_before = internal::get_cpu_time_ms();
     auto wall_start = Clock::now();
-
-    for (int i = 0; i < iterations; ++i) {
-        func();
+    if (async) {
+        std::future<void> f = std::async(std::launch::async, func);
+        f.wait();
+    }
+    {
+        for (int i = 0; i < iterations; ++i) {
+            func();
+        }
     }
 
     auto wall_end = Clock::now();
@@ -96,6 +100,16 @@ inline Result run(const std::string& name, const std::function<void()>& func, in
 
     std::cout << '\n';
     return result;
+}
+
+} // namespace internal
+
+inline Result run_async(const std::string& name, const std::function<void()>& func, int iterations = 1) {
+    return internal::run(true, name, func, iterations);
+}
+
+inline Result run(const std::string& name, const std::function<void()>& func, int iterations = 1) { 
+    return internal::run(false, name, func, iterations);
 }
 
 } // namespace benchy
